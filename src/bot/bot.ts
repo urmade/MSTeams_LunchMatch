@@ -62,7 +62,7 @@ export class BotLogic {
 						if(user) {
 						var entGen = storage.TableUtilities.entityGenerator;
 						var entity = {
-							PartitionKey: entGen.String('TestTenant'),
+							PartitionKey: entGen.String(process.env.TENANTID),
 							RowKey: entGen.String(user),
 							preferredLunchTime: entGen.String("12:00"),
 							preferredLunchDuration: entGen.Int32(45),

@@ -7,7 +7,7 @@ export class RegistrationCard {
 			"body": [
 				{
 					"type": "TextBlock",
-					"text": "Hi "+ username +", nice to meet you!",
+					"text": "Hi, nice to meet you!",
 					"horizontalAlignment": "Center",
 					"size": "Large",
 					"wrap": true
