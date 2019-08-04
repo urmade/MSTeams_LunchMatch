@@ -1,0 +1,33 @@
+body {
+	--teams-color: #6264A7;
+	--teams-background: rgb(243, 242, 241);
+	margin: 0;
+	padding: 0;
+	min-height: 100%;
+	min-width: 100%;
+	background-color: var(--teams-background);
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'sans-serif';
+}
+.save {
+	margin-left: 40%;
+	width: 20%;
+	background-color: var(--teams-color);
+	padding: 10px;
+	color: white;
+	text-align: center;
+	margin-top: 50px;
+}
+.save:hover {
+	cursor: pointer;
+}
+
+.save.disabled {
+	background-color: grey;
+}
+.save.disabled:hover {
+	cursor: not-allowed;
+}
+
+h1 {
+	color: var(--teams-color);
+}

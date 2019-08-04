@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<head>
+	<title>Teams Potential channel Dates</title>
+	<link rel="stylesheet" href="css/dates.css">
+</head>
+
+<body>
+
+	<h1>Please wait a second, we're loading data...</h1>
+
+	<script src="https://unpkg.com/@microsoft/teams-js@1.4.3/dist/MicrosoftTeams.min.js"
+		integrity="sha384-3eIlLKLlRvFpO327eFF+Hh/I0QpH4BxuCGYVJ9gemIKuaOau32pBPR2sBGoWd2UO"
+		crossorigin="anonymous"></script>
+
+	<script>
+		window.onload = (e) => {
+			microsoftTeams.initialize();
+			microsoftTeams.getContext(context => {
+
+				var user = context.tid;
+				var group = context.groupId;
+				if (group == "") {
+					alert("You are not in a Teams channel!");
+					return;
+				}
+				fetch(`/api/potentialDates?user=${user}&group=${group}`).then(resp => console.log(resp));
+
+			})
+		}
+	</script>
+	<h1>Who should you meet today?</h1>
+</body>

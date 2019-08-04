@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<head>
+	<title>Teams Configuration Page</title>
+	<link rel="stylesheet" href="css/settings.css">
+</head>
+
+<body>
+	<script src="https://unpkg.com/@microsoft/teams-js@1.4.3/dist/MicrosoftTeams.min.js"
+		integrity="sha384-3eIlLKLlRvFpO327eFF+Hh/I0QpH4BxuCGYVJ9gemIKuaOau32pBPR2sBGoWd2UO"
+		crossorigin="anonymous"></script>
+	<script>
+		window.onload = (e) => {
+			microsoftTeams.initialize();
+			microsoftTeams.getContext(context => {
+				//Little hack to put all page logic in the getContext()
+				//As the only way to determine if the page is loaded inside Teams is this function
+				//As it will only execute within Teams
+
+				if (context.userObjectId == "") {
+					document.querySelector(".save").innerHTML = "Sorry, we couldn't identify you!";
+					return;
+				}
+				fetch("/api/settings?userId=" + context.userObjectId).then(settings => {
+					settings.json().then(settings => {
+						console.log(settings);
+						document.getElementById("lunchTime").value = settings.preferredLunchTime["_"];
+						document.getElementById("lunchDuration").value = settings.preferredLunchDuration["_"];
+						document.getElementById("coffee").checked = settings.additionalCoffee["_"];
+						document.getElementById("department").value = settings.department["_"];
+
+						document.getElementById("ocp").checked = settings.ocp["_"];
+						document.getElementById("stu").checked = settings.stu["_"];
+						document.getElementById("atu").checked = settings.atu["_"];
+						document.getElementById("csu").checked = settings.csu["_"];
+						document.getElementById("other").checked = settings.other["_"];
+
+						document.getElementById("career").checked = settings.career["_"];
+						document.getElementById("dailyWork").checked = settings.dailyWork["_"];
+						document.getElementById("projects").checked = settings.projects["_"];
+						document.getElementById("nonWork").checked = settings.nonWork["_"];
+					})
+
+				});
+				document.querySelector(".save").innerHTML = "Save your settings";
+				document.querySelector(".save").classList.remove("disabled");
+				document.querySelector(".save").addEventListener("click", () => {
+					saveSettings(context.userObjectId);
+				})
+
+				//End of page logic
+			})
+		}
+
+		function saveSettings(userId) {
+			var server = window.location.host;
+			var xhttp = new XMLHttpRequest();
+
+			var data = JSON.stringify(
+				{
+					user: userId,
+					settings: getSettings(),
+					control: "Available"
+				}
+			);
+
+			xhttp.onreadystatechange = function () {
+				if (this.readyState == 4 && this.status == 200) {
+					document.querySelector(".save").innerHTML = "Changes saved successfully";
+					document.querySelector(".save").classList.remove("disabled");
+				}
+			};
+			xhttp.open("POST", "/api/settings", true);
+			xhttp.setRequestHeader("Content-Type", "application/json");
+			xhttp.send(data);
+
+			document.querySelector(".save").innerHTML = "Saving your changes...";
+			document.querySelector(".save").classList.add("disabled");
+		}
+
+		function getSettings() {
+			var settings = {
+				lunchStart: "",
+				lunchDuration: 0,
+				additionalCoffee: false,
+				department: "OCP",
+				ocp: false,
+				stu: false,
+				atu: false,
+				csu: false,
+				other: false,
+				career: false,
+				dailyWork: false,
+				projects: false,
+				nonWork: false
+			}
+
+			settings.lunchStart = document.getElementById("lunchTime").value;
+			settings.lunchDuration = document.getElementById("lunchDuration").value;
+			settings.additionalCoffee = document.getElementById("coffee").checked;
+			settings.department = document.getElementById("department").value;
+
+			if (document.getElementById("ocp").checked) settings.ocp = true;
+			if (document.getElementById("stu").checked) settings.stu = true;
+			if (document.getElementById("atu").checked) settings.atu = true;
+			if (document.getElementById("csu").checked) settings.csu = true;
+			if (document.getElementById("other").checked) settings.other = true;
+
+			if (document.getElementById("career").checked) settings.career = true;
+			if (document.getElementById("dailyWork").checked) settings.dailyWork = true;
+			if (document.getElementById("projects").checked) settings.projects = true;
+			if (document.getElementById("nonWork").checked) settings.nonWork = true;
+
+			return settings;
+		}
+	</script>
+
+	<h1>How do you like your lunch meetings?</h1>
+	<table class="options">
+		<tr>
+			<td>
+				<p>When do you prefer to go for lunch?</p>
+			</td>
+			<td>
+				<input id="lunchTime" type="time">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<p>How long do you like your lunch (in minutes)?</p>
+			</td>
+			<td>
+				<input id="lunchDuration" type="number">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<p>Would you like to block some time for a coffee after the lunch?</p>
+			</td>
+			<td>
+				<input id="coffee" type="checkbox"> Please block some coffee time
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<p>Which department are you in?</p>
+			</td>
+			<td>
+				<select id="department">
+					<option value="ocp">OCP</option>
+					<option value="stu">STU</option>
+					<option value="atu">ATU</option>
+					<option value="csu">CSU</option>
+					<option value="other">Other</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<p>Which departments do you want to get to know?</p>
+			</td>
+			<td>
+				<div>
+					<input id="ocp" type="checkbox"> OCP
+				</div>
+				<div>
+					<input id="stu" type="checkbox"> STU
+				</div>
+				<div>
+					<input id="atu" type="checkbox"> ATU
+				</div>
+				<div>
+					<input id="csu" type="checkbox"> CSU
+				</div>
+				<div>
+					<input id="other" type="checkbox"> Other
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<p>What do you want to talk about?</p>
+			</td>
+			<td>
+				<div>
+					<input id="career" type="checkbox"> Career at Microsoft
+				</div>
+				<div>
+					<input id="dailyWork" type="checkbox"> Daily work
+				</div>
+				<div>
+					<input id="projects" type="checkbox"> Specific projects
+				</div>
+				<div>
+					<input id="nonWork" type="checkbox"> Everything non-work related
+				</div>
+			</td>
+		</tr>
+	</table>
+	<div class="save disabled">You're not in Microsoft Teams!</div>
+</body>
