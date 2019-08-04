@@ -82,7 +82,7 @@ export class BotLogic {
 						if(successfulOperation) {
 							//TODO Implement Deep Link
 							await turnContext.sendActivity({
-								text: "Great, welcome onboard! You can now either set up your [preferences](https://teams.microsoft.com/l/entity/ab5fc739-8e9a-47ee-9927-95bce8447333/settings?label=Preferences) or start directly by scheduling your first lunch date.",
+								text: "Great, welcome onboard! You can now either set up your [preferences](https://teams.microsoft.com/l/entity/4b5e020f-3400-4dca-ab4f-4fcac69f7cbd/settings?label=Preferences) or start directly by scheduling your first lunch date.",
 								attachments: [CardFactory.adaptiveCard(new SchedulerCard())]							
 							});
 						} 
