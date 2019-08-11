@@ -21,8 +21,8 @@ app.post("/api/bot/messages", (req, res) => {
 	Bot.handle(req, res);
 })
 
-app.get("/api/settings", async (req,res) => {
-	const userProfiles = await new StorageHelper().queryUsers({"RowKey": req.query.userId});
+app.get("/api/settings", async (req, res) => {
+	const userProfiles = await new StorageHelper().queryUsers({ "RowKey": req.query.userId });
 	res.send(userProfiles[0]);
 })
 app.post("/api/settings", async (req, res) => {
@@ -46,7 +46,7 @@ app.post("/api/settings", async (req, res) => {
 		projects: entGen.Boolean(settings.projects),
 		nonWork: entGen.Boolean(settings.nonWork)
 	};
-	if(await new StorageHelper().insertOrReplaceUser(entity)) res.send();
+	if (await new StorageHelper().insertOrReplaceUser(entity)) res.send();
 	else res.status(500).send();
 });
 //TODO: Pre-fill settings with current values when loading

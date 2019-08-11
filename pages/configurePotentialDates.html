@@ -1,0 +1,20 @@
+<body>
+	<h1>Hey, we are loading your tab now!</h1>
+	<script src="https://unpkg.com/@microsoft/teams-js@1.4.3/dist/MicrosoftTeams.min.js"
+		integrity="sha384-3eIlLKLlRvFpO327eFF+Hh/I0QpH4BxuCGYVJ9gemIKuaOau32pBPR2sBGoWd2UO"
+		crossorigin="anonymous"></script>
+	<script>
+		microsoftTeams.initialize();
+		microsoftTeams.settings.registerOnSaveHandler(function (saveEvent) {
+			microsoftTeams.settings.setSettings({
+				entityId: "potentialDates",
+				contentUrl: "https://9d5e8da5.ngrok.io/potentialDates.html",
+				suggestedDisplayName: "Lunch Finder",
+				websiteUrl: "https://9d5e8da5.ngrok.io/potentialDates.html"
+			});
+		})
+		microsoftTeams.settings.setValidityState(true);
+
+
+	</script>
+</body>
