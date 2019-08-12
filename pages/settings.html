@@ -24,21 +24,21 @@
 				fetch("/api/settings?userId=" + context.userObjectId).then(settings => {
 					settings.json().then(settings => {
 						console.log(settings);
-						document.getElementById("lunchTime").value = settings.preferredLunchTime["_"];
-						document.getElementById("lunchDuration").value = settings.preferredLunchDuration["_"];
-						document.getElementById("coffee").checked = settings.additionalCoffee["_"];
-						document.getElementById("department").value = settings.department["_"];
+						document.getElementById("lunchTime").value = settings.preferredLunchTime;
+						document.getElementById("lunchDuration").value = settings.preferredLunchDuration;
+						document.getElementById("coffee").checked = settings.additionalCoffee;
+						document.getElementById("department").value = settings.department;
 
-						document.getElementById("ocp").checked = settings.ocp["_"];
-						document.getElementById("stu").checked = settings.stu["_"];
-						document.getElementById("atu").checked = settings.atu["_"];
-						document.getElementById("csu").checked = settings.csu["_"];
-						document.getElementById("other").checked = settings.other["_"];
+						document.getElementById("ocp").checked = settings.ocp;
+						document.getElementById("stu").checked = settings.stu;
+						document.getElementById("atu").checked = settings.atu;
+						document.getElementById("csu").checked = settings.csu;
+						document.getElementById("other").checked = settings.other;
 
-						document.getElementById("career").checked = settings.career["_"];
-						document.getElementById("dailyWork").checked = settings.dailyWork["_"];
-						document.getElementById("projects").checked = settings.projects["_"];
-						document.getElementById("nonWork").checked = settings.nonWork["_"];
+						document.getElementById("career").checked = settings.career;
+						document.getElementById("dailyWork").checked = settings.dailyWork;
+						document.getElementById("projects").checked = settings.projects;
+						document.getElementById("nonWork").checked = settings.nonWork;
 					})
 
 				});

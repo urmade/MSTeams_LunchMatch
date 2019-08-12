@@ -5,9 +5,14 @@ import { BotLogic as Bot } from "./bot/bot";
 import * as storage from "azure-storage";
 import { StorageHelper } from "./util/StorageHelper";
 import * as dotenv from "dotenv";
+import { GraphQuery } from "./util/graphQueries";
+import { LunchMatching } from "./util/lunchMatching";
 
 const app = express();
 dotenv.config();
+
+//Necessary to fetch AAD token at startup
+const graphQuery = new GraphQuery();
 
 app.use(express.static(join(__dirname, "..", "pages")));
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -52,12 +57,48 @@ app.post("/api/settings", async (req, res) => {
 //TODO: Pre-fill settings with current values when loading
 
 app.get("/api/potentialDates", (req, res) => {
-	//TODO: Get query with group Id and user Id
-	//TODO: Ask Graph about all members in this group
-	//TODO: Look up all members if they have registered for lunch date
-	//TODO: Return all members that signed up sorted by matching score (eg how many common settings)
+	const user = new Promise((resolve,reject) => {
+		new StorageHelper().queryUsers({"RowKey": req.query.user}).then((users) => {
+			resolve(users[0]);
+		})
+	})
 
-	res.send("This is a placeholder");
+
+	const groupUsers = new Promise((resolve,reject) => {
+		graphQuery.getGroupMembers(req.query.group).then((userArray) => {
+			let userPreferences:Array<Promise<any>> = [];
+			for(let i = 0; i < userArray.length; i++) {
+				userPreferences.push(new StorageHelper().queryUsers({"RowKey": userArray[i]}));
+			}
+			Promise.all(userPreferences).then((preferencesArray) => {
+				let preferences = [];
+				for(let i = 0; i < preferencesArray.length; i++) {
+					preferences.push(preferencesArray[i][0]);
+				}
+				resolve(preferences);
+			})
+		})
+	})
+
+	Promise.all([user,groupUsers]).then((values) => {
+		let matches = LunchMatching.match(values[0] as any,values[1] as any);
+
+		let userQueries = [];
+
+		for(let i = 0; i < matches.length; i++) {
+			userQueries.push(new Promise((resolve,reject) => {
+				new GraphQuery().getUserInformation(matches[i].user).then(graphUser => {
+					matches[i].userName = graphUser.displayName;
+					resolve(matches[i]);
+				})
+			}))
+		}
+		Promise.all(userQueries).then(matchUsers => {
+				res.send(matchUsers)
+			}
+			);
+	})
+	//TODO: Return all members that signed up sorted by matching score (eg how many common settings)
 })
 
 app.listen(process.env.PORT || 8080, () => {

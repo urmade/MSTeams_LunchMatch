@@ -9,20 +9,46 @@
 		crossorigin="anonymous"></script>
 
 	<script>
+			let shownContacts = 0;
+			let matchedUsers = [];
 			microsoftTeams.initialize();
 			microsoftTeams.getContext(context => {
 
-				var user = context.tid;
+				var user = context.userObjectId;
 				var group = context.groupId;
 				if (group != "") {
 					document.querySelector("h1").innerHTML = "Howdy!";
-					return;
 				}
-				//fetch(`/api/potentialDates?user=${user}&group=${group}`).then(resp => console.log(resp));
+				fetch(`/api/potentialDates?user=${user}&group=${group}`).then(raw => raw.json().then(matches => {
+					matchedUsers = matches;
+					renderDates();
+					document.querySelector(".loader").style.display = "none";
+					document.querySelector(".lunchPartners").style.display = "block";
+				}));
 
 			})
+
+			function renderDates() {
+				for(let i = shownContacts; i < matchedUsers.length && i < shownContacts + 5; i++) {
+					let contactList = document.querySelector("#contacts");
+						contactList.innerHTML += `<tr><td>${matchedUsers[i].userName}</td><td>You're both interested in: ${matchedUsers[i].topics.join(", ")}</td><td><div class="schedule" tenant="${matchedUsers[i].tenant}" user="${matchedUsers[i].user}">Schedule lunch</div></td></tr>`
+				}
+				shownContacts += 5;
+				if(shownContacts >= matchedUsers.length) document.querySelector("#more").style.display = "none";
+			} 
 	</script>
 
-	<h1>You're not in a Teams channel!</h1>
+	<div class="teamsContent">
+		<div class="loader">
+				<h1>Hey there!</h1>
+				<p>Hang tight, we are currently searching potential lunch partners for you...</p>
+		</div>
+		<div class="lunchPartners">
+			<h3>We found some people in this group that could be a great fit to you!</h3>
+			<table id="contacts">
+			</table>
+			<div id="more" onclick="renderDates()">Show more contacts</div>
+		</div>
+	</div>
 
 </body>

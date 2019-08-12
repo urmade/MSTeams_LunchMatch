@@ -1,0 +1,52 @@
+body {
+	--teams-color: #6264A7;
+	--teams-background: rgb(243, 242, 241);
+	margin: 0;
+	padding: 0;
+	min-height: 100%;
+	min-width: 100%;
+	background-color: var(--teams-background);
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'sans-serif';
+}
+
+.lunchPartners {
+	display: none;
+}
+
+.schedule {
+	padding: 5px;
+	background-color: var(--teams-color);
+	color: white;
+	border-radius: 5px;
+	text-align: center;
+}
+.schedule:hover {
+	cursor: pointer;
+}
+
+table {
+	width: 100%;
+}
+
+tr {
+	background-color: white;
+}
+tr:first-child {
+	border-right: 1px;
+}
+td {
+	padding: 10px;
+}
+
+#more {
+	background-color: var(--teams-color);
+	color: white;
+	width: 40%;
+	margin-top: 30px;
+	margin-left: 30%;
+	text-align: center;
+	padding: 10px;
+}
+#more:hover {
+	cursor: pointer;
+}

@@ -1,20 +1,38 @@
-<body>
-	<h1>Hey, we are loading your tab now!</h1>
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="css/configureDates.css">
 	<script src="https://unpkg.com/@microsoft/teams-js@1.4.3/dist/MicrosoftTeams.min.js"
 		integrity="sha384-3eIlLKLlRvFpO327eFF+Hh/I0QpH4BxuCGYVJ9gemIKuaOau32pBPR2sBGoWd2UO"
 		crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+	<h1>Lunch Match for your tab!</h1>
+
+	<p>Find colleagues, go out for lunch, and make new connections and friends for your professional and personal
+		network!</p>
+	<p>Click on "Save" below to get started.</p>
+
 	<script>
 		microsoftTeams.initialize();
 		microsoftTeams.settings.registerOnSaveHandler(function (saveEvent) {
 			microsoftTeams.settings.setSettings({
 				entityId: "potentialDates",
-				contentUrl: "https://9d5e8da5.ngrok.io/potentialDates.html",
+				contentUrl: "https://f230f977.ngrok.io/potentialDates.html",
 				suggestedDisplayName: "Lunch Finder",
-				websiteUrl: "https://9d5e8da5.ngrok.io/potentialDates.html"
+				websiteUrl: "https://f230f977.ngrok.io/potentialDates.html"
 			});
+
+			//Important line as without it Teams will just throw an "Was not possible; try later" error without further explanation
+			saveEvent.notifySuccess();
 		})
+
 		microsoftTeams.settings.setValidityState(true);
-
-
 	</script>
 </body>
+
+</html>
