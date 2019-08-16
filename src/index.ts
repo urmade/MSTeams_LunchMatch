@@ -87,7 +87,7 @@ app.get("/api/potentialDates", (req, res) => {
 
 		for(let i = 0; i < matches.length; i++) {
 			userQueries.push(new Promise((resolve,reject) => {
-				new GraphQuery().getUserInformation(matches[i].user).then(graphUser => {
+				new GraphQuery().getUser(matches[i].user).then(graphUser => {
 					matches[i].userName = graphUser.displayName;
 					resolve(matches[i]);
 				})
@@ -99,6 +99,16 @@ app.get("/api/potentialDates", (req, res) => {
 			);
 	})
 	//TODO: Return all members that signed up sorted by matching score (eg how many common settings)
+})
+
+app.get("/api/schedule", async (req,res) => {
+	let user = await new StorageHelper().queryUsers({"RowKey": req.query.user});
+	let lunchPartner = await new StorageHelper().queryUsers({"RowKey": req.query.lunchUser});
+
+	let lunchTime = await new GraphQuery().findLunchTime([user[0],lunchPartner[0]]);
+	let lunchDate = new Date(lunchTime.start.dateTime);
+
+	res.send(lunchDate);
 })
 
 app.listen(process.env.PORT || 8080, () => {

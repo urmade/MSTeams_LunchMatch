@@ -7,6 +7,7 @@ export class LunchMatching {
 			if(user.RowKey == userPreferences.RowKey) return;
 			let matchProfile = {
 				matchScore: 0,
+				department: "",
 				topics: [] as Array<string>,
 				user: "",
 				tenant: ""
@@ -14,6 +15,7 @@ export class LunchMatching {
 
 			matchProfile.user = user.RowKey;
 			matchProfile.tenant = user.PartitionKey;
+			matchProfile.department = user.department;
 
 			if(userPreferences.atu && user.department == "ATU") {matchProfile.matchScore += 1; matchProfile.topics.push("ATU")}
 			if(userPreferences.stu && user.department == "STU") {matchProfile.matchScore += 1; matchProfile.topics.push("STU")}

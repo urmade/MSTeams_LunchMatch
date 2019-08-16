@@ -40,6 +40,8 @@ export class StorageHelper {
 						if(result.entries[i].nonWork) result.entries[i].nonWork = result.entries[i].nonWork["_"];
 						if(result.entries[i].ocp) result.entries[i].ocp = result.entries[i].ocp["_"];
 						if(result.entries[i].other) result.entries[i].other = result.entries[i].other["_"];
+						if(result.entries[i].preferredLunchDuration) result.entries[i].preferredLunchDuration = result.entries[i].preferredLunchDuration["_"];
+						if(result.entries[i].preferredLunchTime) result.entries[i].preferredLunchTime = result.entries[i].preferredLunchTime["_"];
 					}
 					resolve(result.entries);
 				}
@@ -49,6 +51,34 @@ export class StorageHelper {
 				}
 			});
 		})
+	}
 
+	//TODO: All user query
+	getAllUsers(): Promise<Array<{}>> {
+		return new Promise((resolve, reject) => {
+			var query = new storage.TableQuery();
+			this.tableService.queryEntities('users', query, null, function (error, result:any, response) {
+				if (!error) {
+					for(let i = 0; i < result.entries.length; i++) {
+						if(result.entries[i].PartitionKey) result.entries[i].PartitionKey = result.entries[i].PartitionKey["_"];
+						if(result.entries[i].RowKey) result.entries[i].RowKey = result.entries[i].RowKey["_"];
+						if(result.entries[i].additionalCoffee) result.entries[i].additionalCoffee = result.entries[i].additionalCoffee["_"];
+						if(result.entries[i].atu) result.entries[i].atu = result.entries[i].atu["_"];
+						if(result.entries[i].career) result.entries[i].career = result.entries[i].career["_"];
+						if(result.entries[i].csu) result.entries[i].csu = result.entries[i].csu["_"];
+						if(result.entries[i].dailyWork) result.entries[i].dailyWork = result.entries[i].dailyWork["_"];
+						if(result.entries[i].department) result.entries[i].department = result.entries[i].department["_"];
+						if(result.entries[i].nonWork) result.entries[i].nonWork = result.entries[i].nonWork["_"];
+						if(result.entries[i].ocp) result.entries[i].ocp = result.entries[i].ocp["_"];
+						if(result.entries[i].other) result.entries[i].other = result.entries[i].other["_"];
+					}
+					resolve(result.entries);
+				}
+				else {
+					reject(error);
+					console.error(error);
+				}
+			});
+		})
 	}
 }

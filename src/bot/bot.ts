@@ -6,6 +6,9 @@ import * as storage from "azure-storage";
 import { StorageHelper } from "../util/StorageHelper";
 import { lunchScheduler } from "./lunchScheduler";
 import * as dotenv from "dotenv";
+import { LunchMatching } from "../util/lunchMatching";
+import { GraphQuery } from "../util/graphQueries";
+import { LunchMatchCard } from "./cards/lunchMatch";
 
 dotenv.config();
 
@@ -38,9 +41,32 @@ export class BotLogic {
 						return;
 					}
 					//End of Helper clause
+					else if(turnContext.activity.text.includes("search")) {
+						let userArr = await new StorageHelper().queryUsers({"RowKey": turnContext.activity.from.aadObjectId});
+						let user:any = userArr[0];
+						let users = await new StorageHelper().getAllUsers();
+						let matches = LunchMatching.match(user,users);
 
+						let userIds:Array<string> = [];
+						for(let i = 0; i < 5 && i < matches.length; i++) {
+							userIds.push(matches[i].user);
+						}
+						let graphUsers = await new GraphQuery().getUsers(userIds);
 
-					//TODO: Send smart time proposals
+						let topMatches:Array<any> = [];
+						for(let i = 0; i < 5 && i < matches.length; i++) {
+							matches[i]["graphUser"] = graphUsers.filter(user => {return user.id == matches[i].user})[0];
+
+							topMatches.push(CardFactory.adaptiveCard(new LunchMatchCard(matches[i].graphUser.displayName, matches[i].graphUser.jobTitle, matches[i].department, matches[i].topics, user.RowKey, matches[i].user)));
+						}
+						
+						await turnContext.sendActivity({
+							attachments: topMatches,
+							attachmentLayout: "carousel"
+						});
+						return;
+					}
+
 					const card = CardFactory.adaptiveCard(new SchedulerCard());
 					// send a reply
 					await turnContext.sendActivity({
@@ -54,8 +80,28 @@ export class BotLogic {
 						const time = turnContext.activity.value.time;
 						await lunchScheduler.findLunchPartners(turnContext.activity.from.aadObjectId);
 						await turnContext.sendActivity("Aight mate, you got yourself a Date at " + date.toDateString() + " starting at " + time + ".");
-						//TODO: Write to calendar
 						return;
+					}
+					if (turnContext.activity.value.action.startsWith("scheduleLunch")) {
+
+						let users = turnContext.activity.value.action as string;
+						let u1 = users.substring(users.indexOf("u1"), users.indexOf("&u2")).split("=")[1];
+						let u2 = users.substring(users.indexOf("u2")).split("=")[1];
+
+						let matchUserOne = await new StorageHelper().queryUsers({"RowKey": u1});
+						let matchUserTwo = await new StorageHelper().queryUsers({"RowKey": u2});
+
+						let userOne = matchUserOne[0];
+						let userTwo = matchUserTwo[0];
+
+						let dateObj = await new GraphQuery().findLunchTime([userOne,userTwo]);
+						let date = new Date(dateObj.start.dateTime);
+
+
+						await turnContext.sendActivity({
+							text: `Awesome, check your calendars! You two will meet at ${date.getDate()}.${date.getMonth()} at ${date.getHours()+2}:${date.getMinutes()}`
+						});
+						//TODO Actual lunch scheduling
 					}
 					else if (turnContext.activity.value.action == "subscribe") {
 						const user = turnContext.activity.from.aadObjectId;
