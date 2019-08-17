@@ -57,7 +57,12 @@ export class GraphQuery {
 					Authorization: ' Bearer ' + this.tokenHandler.currentToken
 				}
 			}
-			request("https://graph.microsoft.com/v1.0/users/" + userId + "/events?$orderby=start/dateTime", options, (error, response, body) => {
+
+			let today = new Date();
+			let quarterYear = new Date();
+			quarterYear.setMonth(today.getMonth() + 3);
+
+			request("https://graph.microsoft.com/v1.0/users/" + userId + "/calendarview?startdatetime="+today.toISOString()+"&enddatetime="+quarterYear.toISOString()+"&$select=start,end&$top=100&$orderby=start/dateTime", options, (error, response, body) => {
 				if (!error) {
 					resolve(JSON.parse(body).value);
 				}
@@ -124,10 +129,17 @@ export class GraphQuery {
 
 		let consent = false;
 
+		let maxRange = new Date();
+		maxRange.setMonth(maxRange.getMonth() + 3);
 
 
 		if (!(userOneCalendar.length == 0 && userTwoCalendar.length == 0)) {
 			while (!consent) {
+				if(lunchStart > maxRange) {
+					return new Promise((resolve,reject) => {
+						resolve("No lunch time found in the next three month!");
+					})
+				}
 				while (
 					!(userOneCalendar.length == 0) &&
 					new Date(userOneCalendar[0].end.dateTime) < lunchStart ||
@@ -155,7 +167,7 @@ export class GraphQuery {
 
 
 		lunchStart.setHours(lunchStart.getHours() + 2);
-		lunchEnd.setHours(lunchEnd.getHours() + 2)
+		lunchEnd.setHours(lunchEnd.getHours() + 2);
 
 		let body = {
 			"subject": "Lunch (by Lunch Match)",
