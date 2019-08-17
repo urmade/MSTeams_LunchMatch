@@ -9,6 +9,7 @@ import * as dotenv from "dotenv";
 import { LunchMatching } from "../util/lunchMatching";
 import { GraphQuery } from "../util/graphQueries";
 import { LunchMatchCard } from "./cards/lunchMatch";
+import { LunchAskCard } from "./cards/lunchAsk";
 
 dotenv.config();
 
@@ -31,7 +32,7 @@ export class BotLogic {
 
 
 					//Helper clause for developing
-					if(turnContext.activity.text.includes("subscribe")) {
+					if (turnContext.activity.text.includes("subscribe")) {
 						const card = CardFactory.adaptiveCard(new RegistrationCard(turnContext.activity.from.name));
 						// send a reply
 						console.log(card);
@@ -41,25 +42,25 @@ export class BotLogic {
 						return;
 					}
 					//End of Helper clause
-					else if(turnContext.activity.text.includes("search")) {
-						let userArr = await new StorageHelper().queryUsers({"RowKey": turnContext.activity.from.aadObjectId});
-						let user:any = userArr[0];
+					else if (turnContext.activity.text.includes("search")) {
+						let userArr = await new StorageHelper().queryUsers({ "RowKey": turnContext.activity.from.aadObjectId });
+						let user: any = userArr[0];
 						let users = await new StorageHelper().getAllUsers();
-						let matches = LunchMatching.match(user,users);
+						let matches = LunchMatching.match(user, users);
 
-						let userIds:Array<string> = [];
-						for(let i = 0; i < 5 && i < matches.length; i++) {
+						let userIds: Array<string> = [];
+						for (let i = 0; i < 5 && i < matches.length; i++) {
 							userIds.push(matches[i].user);
 						}
 						let graphUsers = await new GraphQuery().getUsers(userIds);
 
-						let topMatches:Array<any> = [];
-						for(let i = 0; i < 5 && i < matches.length; i++) {
-							matches[i]["graphUser"] = graphUsers.filter(user => {return user.id == matches[i].user})[0];
+						let topMatches: Array<any> = [];
+						for (let i = 0; i < 5 && i < matches.length; i++) {
+							matches[i]["graphUser"] = graphUsers.filter(user => { return user.id == matches[i].user })[0];
 
 							topMatches.push(CardFactory.adaptiveCard(new LunchMatchCard(matches[i].graphUser.displayName, matches[i].graphUser.jobTitle, matches[i].department, matches[i].topics, user.RowKey, matches[i].user)));
 						}
-						
+
 						await turnContext.sendActivity({
 							attachments: topMatches,
 							attachmentLayout: "carousel"
@@ -88,61 +89,142 @@ export class BotLogic {
 						let u1 = users.substring(users.indexOf("u1"), users.indexOf("&u2")).split("=")[1];
 						let u2 = users.substring(users.indexOf("u2")).split("=")[1];
 
-						let matchUserOne = await new StorageHelper().queryUsers({"RowKey": u1});
-						let matchUserTwo = await new StorageHelper().queryUsers({"RowKey": u2});
+						let matchUserOne = await new StorageHelper().queryUsers({ "RowKey": u1 });
+						let matchUserTwo = await new StorageHelper().queryUsers({ "RowKey": u2 });
 
 						let userOne = matchUserOne[0];
 						let userTwo = matchUserTwo[0];
 
-						let dateObj = await new GraphQuery().findLunchTime([userOne,userTwo]);
+						let dateObj = await new GraphQuery().findLunchTime([userOne, userTwo]);
 						let date = new Date(dateObj.start.dateTime);
 
 
 						await turnContext.sendActivity({
-							text: `Awesome, check your calendars! You two will meet at ${date.getDate()}.${date.getMonth()} at ${date.getHours()+2}:${date.getMinutes()}`
+							text: `Awesome, check your calendars! You two will meet at ${date.getDate()}.${date.getMonth()} at ${date.getHours() + 2}:${date.getMinutes()}`
 						});
 						//TODO Actual lunch scheduling
 					}
 					else if (turnContext.activity.value.action == "subscribe") {
 						const user = turnContext.activity.from.aadObjectId;
-						if(user) {
-						var entGen = storage.TableUtilities.entityGenerator;
-						var entity = {
-							PartitionKey: entGen.String(process.env.TENANTID),
-							RowKey: entGen.String(user),
-							preferredLunchTime: entGen.String("12:00"),
-							preferredLunchDuration: entGen.Int32(45),
-							additionalCoffee: entGen.Boolean(false),
-							department: entGen.String("OCP"),
-							ocp: entGen.Boolean(true),
-							stu: entGen.Boolean(true),
-							atu: entGen.Boolean(true),
-							csu: entGen.Boolean(true),
-							other: entGen.Boolean(true),
-							career: entGen.Boolean(true),
-							dailyWork: entGen.Boolean(true),
-							projects: entGen.Boolean(true),
-							nonWork: entGen.Boolean(true)
-						};
-						let successfulOperation = await new StorageHelper().insertOrReplaceUser(entity);
-						if(successfulOperation) {
-							//TODO Implement Deep Link
-							await turnContext.sendActivity({
-								text: "Great, welcome onboard! You can now either set up your [preferences](https://teams.microsoft.com/l/entity/4b5e020f-3400-4dca-ab4f-4fcac69f7cbd/settings?label=Preferences) or start directly by scheduling your first lunch date.",
-								attachments: [CardFactory.adaptiveCard(new SchedulerCard())]							
-							});
-						} 
-						else await turnContext.sendActivity("Something went wrong. In a 99.9% chance it wasn't your fault, but for excuses purposes we'd like to keep the chance.");
+						if (user) {
+							var entGen = storage.TableUtilities.entityGenerator;
+							var entity = {
+								PartitionKey: entGen.String(process.env.TENANTID),
+								RowKey: entGen.String(user),
+								preferredLunchTime: entGen.String("12:00"),
+								preferredLunchDuration: entGen.Int32(45),
+								additionalCoffee: entGen.Boolean(false),
+								department: entGen.String("OCP"),
+								ocp: entGen.Boolean(true),
+								stu: entGen.Boolean(true),
+								atu: entGen.Boolean(true),
+								csu: entGen.Boolean(true),
+								other: entGen.Boolean(true),
+								career: entGen.Boolean(true),
+								dailyWork: entGen.Boolean(true),
+								projects: entGen.Boolean(true),
+								nonWork: entGen.Boolean(true)
+							};
+							let successfulOperation = await new StorageHelper().insertOrReplaceUser(entity);
+							if (successfulOperation) {
+								//TODO Implement Deep Link
+								await turnContext.sendActivity({
+									text: "Great, welcome onboard! You can now either set up your [preferences](https://teams.microsoft.com/l/entity/4b5e020f-3400-4dca-ab4f-4fcac69f7cbd/settings?label=Preferences) or start directly by scheduling your first lunch date.",
+									attachments: [CardFactory.adaptiveCard(new SchedulerCard())]
+								});
+							}
+							else await turnContext.sendActivity("Something went wrong. In a 99.9% chance it wasn't your fault, but for excuses purposes we'd like to keep the chance.");
 						}
 						else {
 							await turnContext.sendActivity("Sorry, but you need to be within a Microsoft connected chat (e.g. Teams, Skype, ...) in order to use this service. :/");
 						}
 
-						
+
 					}
 				}
 			}
 
+			//Handler for Message extensions
+			else if (turnContext.activity.type === ActivityTypes.Invoke) {
+				if (turnContext.activity.value.commandId == "GroupLunch") {
+
+					let user = await new GraphQuery().getUser(turnContext.activity.from.aadObjectId);
+					let storageUserArr: Array<any> = await new StorageHelper().queryUsers({ RowKey: turnContext.activity.from.aadObjectId });
+					let preferredTime = storageUserArr[0]["preferredLunchTime"];
+
+					let lunchStart = new Date(turnContext.activity.value.data.Date);
+					let h = parseInt(storageUserArr[0]["preferredLunchTime"].split(":")[0]);
+					let m = parseInt(storageUserArr[0]["preferredLunchTime"].split(":")[1]);
+					lunchStart.setHours(h);
+					lunchStart.setMinutes(m);
+
+					let lunchEnd = new Date(turnContext.activity.value.data.Date);
+					lunchEnd.setHours(h);
+					lunchEnd.setMinutes(m + storageUserArr[0]["preferredLunchDuration"]);
+
+					let body = {
+						"subject": "Lunch (by Lunch Match)",
+						"body": {
+							"contentType": "HTML",
+							"content": "Hey, great that you two meet!"
+						},
+						"start": {
+							"dateTime": lunchStart.toISOString(),
+							"timeZone": "Europe/Berlin"
+						},
+						"end": {
+							"dateTime": lunchEnd.toISOString(),
+							"timeZone": "Europe/Berlin"
+						},
+						"location": {
+							"displayName": "At the canteen entry"
+						},
+						"attendees": [
+							{
+								"emailAddress": {
+									"address": user.mail
+								},
+								"type": "required"
+							}
+						]
+					}
+
+
+
+					let lunchEvent: any = await new GraphQuery().createEvent(body, turnContext.activity.from.aadObjectId);
+
+					const card = CardFactory.adaptiveCard(new LunchAskCard(turnContext.activity.value.data.Date + " " + preferredTime, user.displayName, turnContext.activity.from.aadObjectId, lunchEvent.id));
+
+					res.send({
+						"composeExtension": {
+							"type": "result",
+							"attachmentLayout": "list",
+							"attachments": [
+								card
+							]
+						}
+					});
+					return;
+				}
+				else if (turnContext.activity.value.action.startsWith("joinGroupLunch")) {
+
+					const user = turnContext.activity.from.aadObjectId;
+					const initiator = turnContext.activity.value.action.substring(turnContext.activity.value.action.indexOf("&u=")+3);
+					const event = turnContext.activity.value.action.substring(turnContext.activity.value.action.indexOf("&e=")+3, turnContext.activity.value.action.indexOf("&u="));
+					let originalEvent = await new GraphQuery().getEvent(initiator, event);
+					let eventAttendees = [];
+					originalEvent.attendees.map((att: any) => {
+						eventAttendees.push(att.emailAddress.address);
+					})
+					eventAttendees.push(user);
+
+					if (await new GraphQuery().updateEventAttendees(initiator, event, eventAttendees)) {
+						res.send();
+					};
+
+
+				}
+			}
 
 			//A new user was added to a group conversation or the bot gets opened by an user in a 1:1 chat
 			else if (turnContext.activity.type === ActivityTypes.ConversationUpdate) {

@@ -62,7 +62,7 @@ export class GraphQuery {
 			let quarterYear = new Date();
 			quarterYear.setMonth(today.getMonth() + 3);
 
-			request("https://graph.microsoft.com/v1.0/users/" + userId + "/calendarview?startdatetime="+today.toISOString()+"&enddatetime="+quarterYear.toISOString()+"&$select=start,end&$top=100&$orderby=start/dateTime", options, (error, response, body) => {
+			request("https://graph.microsoft.com/v1.0/users/" + userId + "/calendarview?startdatetime=" + today.toISOString() + "&enddatetime=" + quarterYear.toISOString() + "&$select=start,end&$top=100&$orderby=start/dateTime", options, (error, response, body) => {
 				if (!error) {
 					resolve(JSON.parse(body).value);
 				}
@@ -135,8 +135,8 @@ export class GraphQuery {
 
 		if (!(userOneCalendar.length == 0 && userTwoCalendar.length == 0)) {
 			while (!consent) {
-				if(lunchStart > maxRange) {
-					return new Promise((resolve,reject) => {
+				if (lunchStart > maxRange) {
+					return new Promise((resolve, reject) => {
 						resolve("No lunch time found in the next three month!");
 					})
 				}
@@ -202,19 +202,75 @@ export class GraphQuery {
 			]
 		}
 
-		if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
-		const options = {
-			method: 'POST',
-			headers: {
-				Authorization: ' Bearer ' + this.tokenHandler.currentToken,
-				ContentType: "application/json"
-			},
-			body: body,
-			json: true
-		}
+		return this.createEvent(body, users[0].RowKey);
 
-		return new Promise((resolve, reject) => {
-			request("https://graph.microsoft.com/v1.0/users/" + users[0].RowKey + "/events", options, (error, response, content) => {
+
+	}
+
+	getEvent(userId:string, eventId: string): Promise<any> {
+		return new Promise(async (resolve, reject) => {
+			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
+			const options = {
+				method: 'GET',
+				headers: {
+					Authorization: ' Bearer ' + this.tokenHandler.currentToken,
+					ContentType: "application/json"
+				}
+			}
+
+			request("https://graph.microsoft.com/v1.0/users/"+userId+"/events/" + eventId, options, (error, response, content) => {
+				resolve(JSON.parse(content));
+			})
+		})
+	}
+
+	updateEventAttendees(userId:string, eventId: string, attendeeMails: Array<string>): Promise<boolean> {
+		return new Promise(async (resolve, reject) => {
+			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
+
+			let attendees: Array<{}> = [];
+
+			attendeeMails.forEach(mail => {
+				attendees.push({
+					"type": "required",
+					"emailAddress": {
+						"address": mail
+					}
+				})
+			})
+			const options = {
+				method: 'PUT',
+				headers: {
+					Authorization: ' Bearer ' + this.tokenHandler.currentToken,
+					ContentType: "application/json"
+				},
+				json: true,
+				body: {
+					"attendees": attendees
+				}
+			}
+
+			request("https://graph.microsoft.com/v1.0/users/"+userId+"/events/" + eventId, options, (error, response, content) => {
+				if (error) reject(false);
+				else resolve(true);
+			})
+		})
+	}
+
+	createEvent(body: {}, userId: string): Promise<{}> {
+		return new Promise(async (resolve, reject) => {
+			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
+			const options = {
+				method: 'POST',
+				headers: {
+					Authorization: ' Bearer ' + this.tokenHandler.currentToken,
+					ContentType: "application/json"
+				},
+				body: body,
+				json: true
+			}
+
+			request("https://graph.microsoft.com/v1.0/users/" + userId + "/events", options, (error, response, content) => {
 				resolve(content);
 			})
 		})

@@ -19,6 +19,22 @@ export class StorageHelper {
 		})
 	}
 
+	insertEvent(entity: {}): Promise<any> {
+		return new Promise((resolve, reject) => {
+			this.tableService.insertEntity('lunchmeetings', entity, async function (error, result:any, response) {
+				if (!error) {
+					resolve(true);
+				}
+				else {
+					reject(false);
+					console.error(error);
+				}
+			});
+		})
+	}
+
+
+
 	queryUsers(queryTerms: any): Promise<Array<{}>> {
 		return new Promise((resolve, reject) => {
 			let keys = Object.keys(queryTerms);
