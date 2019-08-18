@@ -19,6 +19,7 @@ async function scheduleLunch(turnContext: TurnContext) {
 	let date = new Date(dateObj.start.dateTime);
 
 
+	//TODO Implement an adaptive card that displays the user in a fancy way that his meeting was set
 	await turnContext.sendActivity({
 		text: `Awesome, check your calendars! You two will meet at ${date.getDate()}.${date.getMonth()} at ${date.getHours() + 2}:${date.getMinutes()}`
 	});
@@ -60,8 +61,9 @@ async function subscribe(turnContext: TurnContext) {
 		if (successfulOperation) {
 
 			//Send greeting message to user
+			//TODO Create a deep link to open the preferences tab directly. Syntax for Teams links: [link display text](URL)
 			await turnContext.sendActivity({
-				text: "Great, welcome onboard! You can now either set up your [preferences](https://teams.microsoft.com/l/entity/4b5e020f-3400-4dca-ab4f-4fcac69f7cbd/settings?label=Preferences) or start directly by searching for potential lunch partners. Just type 'search' to do so"
+				text: "Great, welcome onboard! You can now either set up your preferences or start directly by searching for potential lunch partners. Just type 'search' to do so"
 			});
 		}
 		//Send a message in case the database insert threw an error
