@@ -1,12 +1,15 @@
 import { Authenticator } from "./graphAuthentication";
 import * as request from "request";
+import { GraphUser } from "../models/Graph/User";
+import { GraphEvent } from "../models/Graph/Event";
+import { StorageUser } from "../models/LunchMatch/user";
 
 export class GraphQuery {
 	tokenHandler = new Authenticator();
 	constructor() {
 	};
 
-	getUser(userId: string): Promise<any> {
+	getUser(userId: string): Promise<GraphUser> {
 		return new Promise(async (resolve, reject) => {
 			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
 			const options = {
@@ -17,14 +20,14 @@ export class GraphQuery {
 			}
 			request("https://graph.microsoft.com/v1.0/users/" + userId, options, (error, response, body) => {
 				if (!error) {
-					resolve(JSON.parse(body));
+					resolve(GraphUser.fromJSON(JSON.parse(body)));
 				}
 				else reject(error);
 			})
 		})
 	}
 
-	getUsers(userIds: Array<string>): Promise<Array<any>> {
+	getUsers(userIds: Array<string>): Promise<Array<GraphUser>> {
 		return new Promise(async (resolve, reject) => {
 			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
 			const options = {
@@ -38,7 +41,7 @@ export class GraphQuery {
 				namePromises.push(new Promise((resol, rejec) => {
 					request("https://graph.microsoft.com/v1.0/users/" + userIds[i], options, (error, response, body) => {
 						if (!error) {
-							resol(JSON.parse(body));
+							resol(GraphUser.fromJSON(JSON.parse(body)));
 						}
 						else rejec(error);
 					})
@@ -48,7 +51,24 @@ export class GraphQuery {
 		})
 	}
 
-	getEvents(userId: string): Promise<Array<any>> {
+	getEvent(userId: string, eventId: string): Promise<GraphEvent> {
+		return new Promise(async (resolve, reject) => {
+			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
+			const options = {
+				method: 'GET',
+				headers: {
+					Authorization: ' Bearer ' + this.tokenHandler.currentToken,
+					ContentType: "application/json"
+				}
+			}
+
+			request("https://graph.microsoft.com/v1.0/users/" + userId + "/events/" + eventId, options, (error, response, content) => {
+				resolve(GraphEvent.fromJSON(JSON.parse(content)));
+			})
+		})
+	}
+	//Returns only start and end time of an event, therefore no Graph Event
+	getEvents(userId: string): Promise<Array<{ start: { dateTime: string, timeZone: string }, end: { dateTime: string, timeZone: string } }>> {
 		return new Promise(async (resolve, reject) => {
 			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
 			const options = {
@@ -64,15 +84,30 @@ export class GraphQuery {
 
 			request("https://graph.microsoft.com/v1.0/users/" + userId + "/calendarview?startdatetime=" + today.toISOString() + "&enddatetime=" + quarterYear.toISOString() + "&$select=start,end&$top=100&$orderby=start/dateTime", options, (error, response, body) => {
 				if (!error) {
-					resolve(JSON.parse(body).value);
+					let jsonArr: Array<any> = JSON.parse(body).value;
+					let eventArr: Array<{ start: { dateTime: string, timeZone: string }, end: { dateTime: string, timeZone: string } }> = [];
+					jsonArr.map(event => {
+						eventArr.push({
+							start: {
+								dateTime: event.start.dateTime,
+								timeZone: event.start.timeZone
+							},
+							end: {
+								dateTime: event.end.dateTime,
+								timeZone: event.end.timeZone
+							},
+						});
+					})
+					resolve(eventArr);
 				}
 				else reject(error);
 			})
 		})
 	}
 
-	getGroupMembers(groupId: string): Promise<Array<string>> {
-		return new Promise((resolve, reject) => {
+	getGroupMemberIDs(groupId: string): Promise<Array<string>> {
+		return new Promise(async (resolve, reject) => {
+			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
 			const options = {
 				method: 'GET',
 				headers: {
@@ -95,13 +130,13 @@ export class GraphQuery {
 	}
 
 	//Evil Spaghetti code, do not touch, could explode!
-	async findLunchTime(users: Array<any>): Promise<any> {
+	async findLunchTime(users: Array<StorageUser>): Promise<any> {
 
-		let userOne = await this.getUser(users[0].RowKey);
-		let userTwo = await this.getUser(users[1].RowKey);
+		let userOne = await this.getUser(users[0].rowKey);
+		let userTwo = await this.getUser(users[1].rowKey);
 
-		let userOneCalendar = await this.getEvents(users[0].RowKey);
-		let userTwoCalendar = await this.getEvents(users[1].RowKey);
+		let userOneCalendar = await this.getEvents(users[0].rowKey);
+		let userTwoCalendar = await this.getEvents(users[1].rowKey);
 
 		let preferredDuration = Math.min(users[0].preferredLunchDuration, users[1].preferredLunchDuration);
 		let preferredStart = Math.min(this.preferredTimeToInt(users[0].preferredLunchTime), this.preferredTimeToInt(users[1].preferredLunchTime));
@@ -202,29 +237,14 @@ export class GraphQuery {
 			]
 		}
 
-		return this.createEvent(body, users[0].RowKey);
+		return this.createEvent(body, users[0].rowKey);
 
 
 	}
 
-	getEvent(userId:string, eventId: string): Promise<any> {
-		return new Promise(async (resolve, reject) => {
-			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
-			const options = {
-				method: 'GET',
-				headers: {
-					Authorization: ' Bearer ' + this.tokenHandler.currentToken,
-					ContentType: "application/json"
-				}
-			}
 
-			request("https://graph.microsoft.com/v1.0/users/"+userId+"/events/" + eventId, options, (error, response, content) => {
-				resolve(JSON.parse(content));
-			})
-		})
-	}
 
-	updateEventAttendees(userId:string, eventId: string, attendeeMails: Array<string>): Promise<boolean> {
+	updateEventAttendees(userId: string, eventId: string, attendeeMails: Array<string>): Promise<boolean> {
 		return new Promise(async (resolve, reject) => {
 			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
 
@@ -250,14 +270,14 @@ export class GraphQuery {
 				}
 			}
 
-			request("https://graph.microsoft.com/v1.0/users/"+userId+"/events/" + eventId, options, (error, response, content) => {
+			request("https://graph.microsoft.com/v1.0/users/" + userId + "/events/" + eventId, options, (error, response, content) => {
 				if (error) reject(false);
 				else resolve(true);
 			})
 		})
 	}
 
-	createEvent(body: {}, userId: string): Promise<{}> {
+	createEvent(body: {}, userId: string): Promise<GraphEvent> {
 		return new Promise(async (resolve, reject) => {
 			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
 			const options = {
@@ -271,7 +291,7 @@ export class GraphQuery {
 			}
 
 			request("https://graph.microsoft.com/v1.0/users/" + userId + "/events", options, (error, response, content) => {
-				resolve(content);
+				resolve(GraphEvent.fromJSON(content));
 			})
 		})
 	}

@@ -1,5 +1,8 @@
 import * as request from "request";
 
+/**
+ * Helper class to handle AAD Access_token acquiration.
+ */
 export class Authenticator {
 	appId:string = process.env.GRAPHAPPID;
 	appSecret:string = process.env.GRAPHAPPSECRET;
