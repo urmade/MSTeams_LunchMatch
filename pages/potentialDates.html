@@ -15,9 +15,10 @@
 		microsoftTeams.initialize();
 		microsoftTeams.getContext(context => {
 
-			var user = context.userObjectId;
+			//TODO: Get ID of the currently visiting user and the group ID in which the tab is hosted
+			var user = "";
 			userId = user;
-			var group = context.groupId;
+			var group = "";
 			fetch(`/api/potentialDates?user=${user}&group=${group}`).then(raw => raw.json().then(matches => {
 				matchedUsers = matches;
 				renderDates();

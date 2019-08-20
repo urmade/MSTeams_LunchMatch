@@ -9,16 +9,17 @@ export class GraphQuery {
 	constructor() {
 	};
 
+	//TODO Implement this query
 	getUser(userId: string): Promise<GraphUser> {
 		return new Promise(async (resolve, reject) => {
 			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
 			const options = {
-				method: 'GET',
+				method: 'HTTP Method',
 				headers: {
 					Authorization: ' Bearer ' + this.tokenHandler.currentToken
 				}
 			}
-			request("https://graph.microsoft.com/v1.0/users/" + userId, options, (error, response, body) => {
+			request("Insert the right Graph query here", options, (error, response, body) => {
 				if (!error) {
 					resolve(GraphUser.fromJSON(JSON.parse(body)));
 				}
@@ -29,23 +30,9 @@ export class GraphQuery {
 
 	getUsers(userIds: Array<string>): Promise<Array<GraphUser>> {
 		return new Promise(async (resolve, reject) => {
-			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
-			const options = {
-				method: 'GET',
-				headers: {
-					Authorization: ' Bearer ' + this.tokenHandler.currentToken
-				}
-			}
 			let namePromises: Array<Promise<any>> = [];
 			for (let i = 0; i < userIds.length; i++) {
-				namePromises.push(new Promise((resol, rejec) => {
-					request("https://graph.microsoft.com/v1.0/users/" + userIds[i], options, (error, response, body) => {
-						if (!error) {
-							resol(GraphUser.fromJSON(JSON.parse(body)));
-						}
-						else rejec(error);
-					})
-				}))
+				namePromises.push(this.getUser(userIds[i]));
 			}
 			resolve(await Promise.all(namePromises));
 		})
