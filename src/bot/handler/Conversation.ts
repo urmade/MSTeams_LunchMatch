@@ -12,9 +12,12 @@ async function search(turnContext: TurnContext) {
 	//Get all users in the Lunch Match database
 	let users = await new StorageQuery().getAllUsers();
 
+	//TODO: Find the AAD ID of the user who messaged the bot
+	let conversationPartner = "";
+
 	//Find the invoking user by searching all users for the user which RowKey (AAD ID) matches the AAD ID of the invoking user
 	let user = users.find((u) => {
-		return u.rowKey == turnContext.activity.from.aadObjectId;
+		return u.rowKey == conversationPartner;
 	})
 
 	//Match the users 
@@ -70,7 +73,6 @@ export default async function handle(turnContext: TurnContext) {
 async function subscribe(turnContext: TurnContext) {
 	const card = CardFactory.adaptiveCard(new RegistrationCard(turnContext.activity.from.name));
 	// send a reply
-	console.log(card);
 	await turnContext.sendActivity({
 		attachments: [card]
 	});
