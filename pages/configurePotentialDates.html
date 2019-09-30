@@ -22,9 +22,9 @@
 		microsoftTeams.settings.registerOnSaveHandler(function (saveEvent) {
 			microsoftTeams.settings.setSettings({
 				entityId: "potentialDates",
-				contentUrl: "https://" + window.location.host + "/potentialDates.html",
+				contentUrl: "https://" + window.location.host + "/tab.html",
 				suggestedDisplayName: "Lunch Finder",
-				websiteUrl: "https://" + window.location.host + "/potentialDates.html"
+				websiteUrl: "https://" + window.location.host + "/tab.html"
 			});
 
 			//Important line as without it Teams will just throw an "Was not possible; try later" error without further explanation

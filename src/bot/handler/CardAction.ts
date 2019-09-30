@@ -60,7 +60,7 @@ async function subscribe(turnContext: TurnContext) {
 		let successfulOperation = await new StorageQuery().insertOrReplaceUser(entity);
 		if (successfulOperation) {
 
-			//Send greeting message to user
+			//Send greeting message to a completely new user
 			//TODO Create a deep link to open the preferences tab directly. Syntax for Teams links: [link display text](URL)
 			await turnContext.sendActivity({
 				text: "Great, welcome onboard! You can now either set up your preferences or start directly by searching for potential lunch partners. Just type 'search' to do so"
