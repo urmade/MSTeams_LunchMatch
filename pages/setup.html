@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+</head>
+
+<body>
+	<h1>Login Details</h1>
+	<p>0yournumber@mscampuscomm.onmicrosoft.com<br>TeamsTest123</p>
+	<h1>Links for the Manifest</h1>
+	<table>
+		<tr>
+			<td>Personal Scope Tab Link</td>
+			<td>https://lunchtinder.azurewebsites.net/settings.html</td>
+		</tr>
+		<tr>
+			<td>Channel Scope Tab Configuration Link</td>
+			<td>https://lunchtinder.azurewebsites.net/potentialDates.html</td>
+		</tr>
+		<tr>
+			<td>Personal Scope Bot Id</td>
+			<td>f44a8676-d4f0-438d-bf8f-bbe70423554e</td>
+		</tr>
+		<tr>
+			<td>Message Extension Endpoint</td>
+			<td>https://lunchtinder.azurewebsites.net/api/bot/messages</td>
+		</tr>
+	</table>
+	<h1>.env file</h1>
+	<code>
+#AAD Application registration for tenant-wide interactions with Microsoft Graph<br>
+GRAPHAPPID=6cac9e23-63e3-4c66-ba0e-685a184b559f<br>
+GRAPHAPPSECRET=dGNgXzS@m0qBJnYQ3/3+ac2ztyLmaH/U<br>
+<br>
+#AAD Application registration for the chatbot<br>
+BOTAPPID=f44a8676-d4f0-438d-bf8f-bbe70423554e<br>
+BOTAPPSECRET=bXe+1v/i03+fYaN*PGvYAkjAK1o1Bw?H<br>
+
+#Connection string to Azure Storage account that holds user management<br>
+TABLESTORAGECONNECTIONSTRING=DefaultEndpointsProtocol=https;AccountName=lunchdate;AccountKey=bV0YsBrlsKxoSewUvvDPpDzsGirbqaU9s/dMBnU0kfTvIFmFyeCgb6Vdx4968pKjyoSmPR342LImN9riMWwVdA==;EndpointSuffix=core.windows.net<br>
+<br>
+#ID to the Tenant for which the App is hosted<br>
+TENANTID=323593ac-22c0-49aa-9467-4b4d1a786516<br>
+		</code>
+</body>
+
+</html>
