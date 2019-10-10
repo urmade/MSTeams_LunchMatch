@@ -6,3 +6,4 @@ node_modules
 tsconfig.tsbuildinfo
 TODO
 challenges.txt
+pages/setup.html
