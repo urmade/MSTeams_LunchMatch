@@ -10,6 +10,7 @@ export class GraphQuery {
 	};
 
 	//TODO Implement this query
+	//Hint: The query must be able to find ANY user by an ID
 	getUser(userId: string): Promise<GraphUser> {
 		return new Promise(async (resolve, reject) => {
 			if (!this.tokenHandler.currentToken) this.tokenHandler.currentToken = await this.tokenHandler.acquireToken();
