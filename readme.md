@@ -12,7 +12,7 @@ The basic idea of this solution is to make networking in an organization easier 
 
 ## Setup for training participants
 
-To use this lab in an instructor-led training, you will need [ngrok](https://ngrok.com/download), [Visual Studio Code](https://code.visualstudio.com/download) and [Node.js](https://nodejs.org/en/download/). Clone this repository to your local machine, and then navigate (preferably in your browser) to the Challenges.md page. Here you will find all instructions for the lab.
+To use this lab in an instructor-led training, you will need [ngrok](https://ngrok.com/download), [Visual Studio Code](https://code.visualstudio.com/download) and [Node.js](https://nodejs.org/en/download/). Clone this repository to your local machine, and then navigate (preferably in your browser) to the **Challenges.md** page. Here you will find all instructions for the lab.
 
 ## Setup for instructors or self-paced learners
 
